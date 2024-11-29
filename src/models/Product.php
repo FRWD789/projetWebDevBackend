@@ -2,11 +2,13 @@
 class Product {
     private $conn;
     const GET_ALL_PRODUCTS = "SELECT * FROM product";
+    const GET_PRODUCT_BY_ID = "SELECT * FROM product WHERE product_id=:id";
     const ADD_PRODUCT = "INSERT INTO `product` (product_name, product_detail_id, stock, price, category_id, brand_id, product_img) VALUES (:product_name,:product_detail_id,:stock,:price,:category_id,:brand_id,:product_img)";
     const ADD_PRODUCT_DETAIL = "INSERT INTO `product_detail` (product_description, product_max_freq, product_min_freq, product_impedance) VALUES (:product_description,:product_max_freq,:product_min_freq,:product_impedance)";
     const GET_BRAND_ID = "SELECT brand_id FROM brands WHERE brand_name = :brandName";
     const GET_CATEGORY_ID = "SELECT categorie_id FROM category WHERE categorie_name = :categorieName";
-
+    const DELETE_PRODUCT_ID = "DELETE FROM `product` WHERE product_id=:id";
+    const UPDATE_STOCK_PRICE = "UPDATE product SET price=:prix ,stock = :stock WHERE product_id=:id";
     private function getCategoryById($category){
         try {
             $stmt = $this->conn->prepare(self::GET_CATEGORY_ID);
@@ -64,13 +66,14 @@ class Product {
         } catch (PDOException $error) {
             http_response_code(500);
             echo json_encode(['message' => 'Internal Server Error: ' . $error->getMessage()]);
+            exit;
         }
         return $result;
     }
 
     public function addProduct(array $data){
-        // Log the incoming data
-        error_log(print_r($data, true)); 
+ 
+       
 
         $brand_id = $this->getBrandById($data['brand']);
         $category_id = $this->getCategoryById($data['category']);
@@ -96,7 +99,67 @@ class Product {
         } catch (PDOException $error) {
             http_response_code(500);
             echo json_encode(['message' => 'Internal Server Error: ' . $error->getMessage()]);
+            exit;
         }
+    }
+
+
+    public function removeProductById($id){
+        try {
+            $stmt = $this->conn->prepare(self::DELETE_PRODUCT_ID);
+            $stmt->execute([
+               ':id'=>$id
+            ]);
+            return $stmt;
+        } catch (PDOException $error) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Internal Server Error: ' . $error->getMessage()]);
+            exit;
+        }
+    }
+
+    public function getProductById($id){
+        $result = null;
+        try {
+            $stmt = $this->conn->prepare(self::GET_PRODUCT_BY_ID);
+            $stmt->execute([
+               ':id'=>$id
+            ]);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $error) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Internal Server Error: ' . $error->getMessage()]);
+            exit;
+        }
+        return  $result;
+    }
+
+    public function updateProduct($id,array $newData){
+
+        $setClause = [];
+        $values = [];
+        foreach($newData as $key => $value){
+            
+            $param = "$key =:$key";
+            array_push($setClause,$param);
+            $values[":$key"] = $value;//appends params to values arrays with dynamic ecriture or we can use array_combine() from php 
+
+        }
+        $setStaments = implode(',',$setClause);
+
+        $query = "UPDATE product SET  $setStaments WHERE product_id=:product_id";
+        $values["product_id"] = $id;
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute( $values);
+            return $stmt;
+        } catch (PDOException $error) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Internal Server Error: ' . $error->getMessage()]);
+            exit;
+        }
+       
+        
     }
 }
 ?>
