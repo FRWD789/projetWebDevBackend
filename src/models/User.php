@@ -6,6 +6,7 @@ class User{
     const ADD_USER = 'INSERT INTO `client` (user_name,email,password) VALUES(:user_name,:email,:password)';
     const EXIST_USER_NAME = "SELECT user_name FROM client WHERE user_name=:user_name ";
     const GET_USER_INFO = "SELECT user_name,user_id,password FROM client WHERE user_name=:user_name ";
+    const UPDATE_USER_EMAIL = "UPDATE `client` SET email= :email WHERE user_name = :user_name";
     public function __construct(PDO $bd)
     {
         $this->conn = $bd;
@@ -65,6 +66,25 @@ class User{
             exit;
         }
 
+    }
+
+
+    public function updateEmail(string $newEmail,string $userName,string $password){
+        if($this->login($userName,$password)){
+            try{
+                $stmt = $this->conn->prepare(self::UPDATE_USER_EMAIL );
+                return $stmt->execute( [
+                    ":user_name"=>$userName,
+                    ":email"=>$newEmail
+                ]);
+            }catch(PDOException $error){
+                http_response_code(500);
+                echo json_encode(['message' => 'Internal Server Error: ' . $error->getMessage()]);
+                exit;
+            }
+        }
+
+        
     }
 
 
