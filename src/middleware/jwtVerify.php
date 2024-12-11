@@ -6,7 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 
  function verifyToken() {
-    // Get the Authorization header
+
     $headers = getallheaders();
     if (!isset($headers['Authorization'])){
         http_response_code(400);

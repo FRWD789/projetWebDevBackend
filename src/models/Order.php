@@ -1,7 +1,4 @@
 <?php 
-
-
-
 class Order {
     private $conn ;
 
@@ -59,14 +56,14 @@ class Order {
             $orderItem = $stmt->fetch();
         
             if ($orderItem) {
-                // Update quantity if the product already exists
+              
                 $stmt = $this->conn->prepare("UPDATE order_items SET quantity = quantity + 1 WHERE order_id = :order_id AND product_id = :product_id");
                 return $stmt->execute([
                     ":order_id"=>$orderId, 
                     ":product_id" =>$data['product_id']
                 ]);
             } else {
-                // Insert new item if it doesn't exist
+               
                 $stmt = $this->conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (:order_id,:product_id,:quantity,:price)");
                 return $stmt->execute([
                     ":order_id"=>$orderId, 

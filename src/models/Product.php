@@ -2,13 +2,56 @@
 class Product {
     private $conn;
     const GET_ALL_PRODUCTS = "SELECT * FROM product";
-    const GET_PRODUCT_BY_ID = "SELECT * FROM product WHERE product_id=:id";
+    
     const ADD_PRODUCT = "INSERT INTO `product` (product_name, product_detail_id, stock, price, category_id, brand_id, product_img) VALUES (:product_name,:product_detail_id,:stock,:price,:category_id,:brand_id,:product_img)";
     const ADD_PRODUCT_DETAIL = "INSERT INTO `product_detail` (product_description, product_max_freq, product_min_freq, product_impedance) VALUES (:product_description,:product_max_freq,:product_min_freq,:product_impedance)";
     const GET_BRAND_ID = "SELECT brand_id FROM brands WHERE brand_name = :brandName";
     const GET_CATEGORY_ID = "SELECT categorie_id FROM category WHERE categorie_name = :categorieName";
     const DELETE_PRODUCT_ID = "DELETE FROM `product` WHERE product_id=:id";
     const UPDATE_STOCK_PRICE = "UPDATE product SET price=:prix ,stock = :stock WHERE product_id=:id";
+    const GET_PRODUCT_BY_Category = "SELECT 
+                                            p.product_id,
+                                            p.product_name, 
+                                            p.price,
+                                            p.product_img,
+                                            b.brand_name, 
+                                            c.categorie_name
+                                            FROM 
+                                            product p
+                                            JOIN 
+                                            brands b ON p.brand_id = b.brand_id
+                                            JOIN 
+                                            category c ON p.category_id = c.categorie_id
+                                            WHERE 
+                                            p.category_id = :category_id; ";
+        const GET_PRODUCT_BY_ID = "SELECT 
+                                        p.product_id,
+                                        p.product_name,
+                                        p.price,
+                                        p.product_img,
+                                        b.brand_name,
+                                        c.categorie_name,
+                                        pd.*
+                                    FROM 
+                                        product p
+                                    JOIN 
+                                        brands b ON p.brand_id = b.brand_id
+                                    JOIN 
+                                        category c ON p.category_id = c.categorie_id
+                                    JOIN 
+                                        product_detail pd ON p.product_detail_id = pd.product_detail_id 
+                                    WHERE 
+                                        p.product_id = :id;";
+    
+    
+    
+   
+    
+    
+    
+    
+    
+    
     private function getCategoryById($category){
         try {
             $stmt = $this->conn->prepare(self::GET_CATEGORY_ID);
@@ -21,6 +64,27 @@ class Product {
             exit;
         }
     }
+     
+    public function getProductbyCategory($category){
+
+        $gategId = $this->getCategoryById($category);
+        if(!isset($gategId)){
+            http_response_code(404);
+            echo json_encode(['message' => 'Not found' ]);
+            exit;
+        }
+        try {
+            $stmt = $this->conn->prepare(self::GET_PRODUCT_BY_Category);
+            $stmt->execute(['category_id' => $gategId]);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $result ;
+        } catch (PDOException $error) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Internal Server Error: ' . $error->getMessage()]);
+            exit;
+        }
+    }
+    
 
     public function addProductDetail($product_description, $product_max_freq, $product_min_freq, $product_impedance){
         try {
@@ -142,7 +206,7 @@ class Product {
             
             $param = "$key =:$key";
             array_push($setClause,$param);
-            $values[":$key"] = $value;//appends params to values arrays with dynamic ecriture or we can use array_combine() from php 
+            $values[":$key"] = $value;
 
         }
         $setStaments = implode(',',$setClause);

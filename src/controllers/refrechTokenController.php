@@ -37,7 +37,7 @@ function validateRefreshToken(){
         http_response_code(200);
         echo json_encode([
             'message' => 'Access token refreshed successfully.',
-            'access_token' => $accessToken
+            'accessToken' => $accessToken
         ]);
     }catch(Exception $error){
             http_response_code(401);

@@ -1,8 +1,5 @@
 <?php
-// Autoload dependencies (if using Composer)
 
-
-// Get the current request URI
 $requestUri = $_SERVER['REQUEST_URI'];
 $uriSegments = explode('/', trim($requestUri, '/'));
 

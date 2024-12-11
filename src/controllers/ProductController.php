@@ -18,7 +18,7 @@ class ProductController {
             echo json_encode(['message' => ' Internal Server Error']);
         }
         
-        // Return products as JSON
+
        
     }
     public function addProduct() {
@@ -69,6 +69,24 @@ class ProductController {
 
 
     }
+    public function getProductByCategory($categ){
+
+        if(!isset($categ)){
+            http_response_code(400);
+            echo json_encode(['message' => 'bad request ,product_id monquant']);
+            exit; // arret l'excution du code 
+        }
+        $product = $this->productModel->getProductByCategory($categ);
+        if($product){
+            http_response_code(200);
+            echo json_encode($product);
+        }else{
+            http_response_code(404);
+            echo json_encode(['message' => ' product Not Found ']);
+            exit;
+        }
+
+    }
 
     public function getProductById($id){
 
@@ -112,9 +130,9 @@ class ProductController {
         if (isset($data['price'])) {
             $fieldsToUpdate['price'] = $data['price'];
         }
+        
 
         if(empty($fieldsToUpdate)){
-           
             http_response_code(400);
             echo json_encode(['message' => 'bad request empty request ']);
             exit;
