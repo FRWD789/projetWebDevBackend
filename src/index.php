@@ -25,61 +25,48 @@ $endpoint = isset($_GET) && !empty($_GET)
 ? explode('?', $uriSegments[1])[0] 
 : $uriSegments[1]; 
 $uriSegments2 = isset($uriSegments[2])?  $uriSegments[2] : null;
-
-if ($endpoint === 'products' && !isset($_GET)) {
-
-   
-
-     switch($requestMethod){
-         case "GET":
-            $productController->getProducts();
-             break;
-         case "POST":
-             $productController->addProduct();
-         break;
-        case "DELETE":
-            $productController->removeProduct();
-        break;
-         default:
-         http_response_code(405);  // Method Not Allowed
-         echo json_encode(['message' => 'Method Not Allowed']);
-     }
-
-    
- } 
-
-
-
- elseif($endpoint === 'products'&& (isset($_GET))){
-    
-   
-        if(isset($_GET['p_id'])){
-            switch($requestMethod){
-                case "GET":
-                    $productController->getProductById($_GET['p_id']);
-                    break;
-               case "PUT":
-                    $productController->updateProduct($_GET['p_id']);
-               break;
-               default:
-               http_response_code(405);  // Method Not Allowed
+if ($endpoint === 'products') {
+    if (count($_GET)==0) {
+        switch ($requestMethod) {
+            case "GET":
+                $productController->getProducts();
+                break;
+            case "POST":
+                $productController->addProduct();
+                break;
+            case "DELETE":
+                $productController->removeProduct();
+                break;
+            default:
+                http_response_code(405); // Method Not Allowed
                 echo json_encode(['message' => 'Method Not Allowed']);
-
-        }}elseif(isset($_GET['p_categ'])){
-            switch($requestMethod){
-                case "GET":
-                    $productController->getProductByCategory($_GET['p_categ']);
-                    break;
-               default:
-               http_response_code(405);  // Method Not Allowed
-                echo json_encode(['message' => 'Method Not Allowed']);
-        }}else{
-            http_response_code(404);  // Method Not Allowed
-            echo json_encode(['message' => 'Method Not Allowed']);
         }
-      
-         
+    } elseif (isset($_GET['p_id'])) {
+        switch ($requestMethod) {
+            case "GET":
+                $productController->getProductById($_GET['p_id']);
+                break;
+            case "PUT":
+                $productController->updateProduct($_GET['p_id']);
+                break;
+            default:
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method Not Allowed']);
+        }
+    } elseif (isset($_GET['p_categ'])) {
+        switch ($requestMethod) {
+            case "GET":
+                $productController->getProductByCategory($_GET['p_categ']);
+                break;
+            default:
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method Not Allowed']);
+        }
+    } else {
+        http_response_code(405); // Method Not Allowed
+        echo json_encode(['message' => 'Method Not Allowed']);
     }
+}
   elseif($endpoint==='sign-up'){
      switch($requestMethod){
          case "POST":
@@ -156,7 +143,6 @@ if ($endpoint === 'products' && !isset($_GET)) {
 
 }
 elseif($endpoint === 'account' && isset($_GET['u_id'])){
-
        switch($requestMethod){
              case "GET":
                $userController->getUserInfo($_GET['u_id']);
@@ -172,7 +158,6 @@ elseif($endpoint === 'account' && isset($_GET['u_id'])){
     
  }elseif($endpoint === 'cart'){
      switch($requestMethod){
-
          case "POST":
             $orderController->addItemToshoppingCart();
              break;
